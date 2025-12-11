@@ -60,6 +60,7 @@
   },
   "homepage": "https://github.com/andrewDeacy/TodoListClient#readme",
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^5.91.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
