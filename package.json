@@ -4,6 +4,8 @@
   "description": "A production-quality React frontend application for managing todo lists and todo items. Built with React 18+, TypeScript, React Query, and modern best practices.",
   "main": "index.js",
   "dependencies": {
+    "@tanstack/react-query": "^5.90.12",
+    "axios": "^1.13.2",
     "baseline-browser-mapping": "^2.9.6",
     "browserslist": "^4.28.1",
     "caniuse-lite": "^1.0.30001760",
@@ -29,6 +31,7 @@
     "react": "^19.2.1",
     "react-dom": "^19.2.1",
     "react-refresh": "^0.18.0",
+    "react-router-dom": "^7.10.1",
     "rollup": "^4.53.3",
     "scheduler": "^0.27.0",
     "semver": "^6.3.1",
@@ -56,10 +59,17 @@
   },
   "homepage": "https://github.com/andrewDeacy/TodoListClient#readme",
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.0.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^5.1.2",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "vite": "^7.2.7"
   }
