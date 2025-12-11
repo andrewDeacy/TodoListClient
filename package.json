@@ -1,0 +1,66 @@
+{
+  "name": "todolistclient",
+  "version": "1.0.0",
+  "description": "A production-quality React frontend application for managing todo lists and todo items. Built with React 18+, TypeScript, React Query, and modern best practices.",
+  "main": "index.js",
+  "dependencies": {
+    "baseline-browser-mapping": "^2.9.6",
+    "browserslist": "^4.28.1",
+    "caniuse-lite": "^1.0.30001760",
+    "convert-source-map": "^2.0.0",
+    "csstype": "^3.2.3",
+    "debug": "^4.4.3",
+    "electron-to-chromium": "^1.5.267",
+    "esbuild": "^0.25.12",
+    "escalade": "^3.2.0",
+    "fdir": "^6.5.0",
+    "fsevents": "^2.3.3",
+    "gensync": "^1.0.0-beta.2",
+    "js-tokens": "^4.0.0",
+    "jsesc": "^3.1.0",
+    "json5": "^2.2.3",
+    "lru-cache": "^5.1.1",
+    "ms": "^2.1.3",
+    "nanoid": "^3.3.11",
+    "node-releases": "^2.0.27",
+    "picocolors": "^1.1.1",
+    "picomatch": "^4.0.3",
+    "postcss": "^8.5.6",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "react-refresh": "^0.18.0",
+    "rollup": "^4.53.3",
+    "scheduler": "^0.27.0",
+    "semver": "^6.3.1",
+    "source-map-js": "^1.2.1",
+    "tinyglobby": "^0.2.15",
+    "undici-types": "^7.16.0",
+    "update-browserslist-db": "^1.2.2",
+    "yallist": "^3.1.1"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/andrewDeacy/TodoListClient.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/andrewDeacy/TodoListClient/issues"
+  },
+  "homepage": "https://github.com/andrewDeacy/TodoListClient#readme",
+  "devDependencies": {
+    "@types/node": "^25.0.0",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^5.1.2",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.7"
+  }
+}
