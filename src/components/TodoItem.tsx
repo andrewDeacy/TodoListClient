@@ -1,0 +1,272 @@
+/**
+ * TodoItem Component
+ * 
+ * Displays a single todo item with completion toggle, edit, and delete actions.
+ * Handles item completion state using React Query mutations.
+ */
+
+import React from 'react';
+import { useMarkItemComplete, useDeleteItem } from '../hooks/useTodoItems';
+import { Button, Card } from './ui';
+import type { TodoItem as TodoItemType } from '../types/api';
+
+/**
+ * Props for TodoItem component
+ */
+export interface TodoItemProps {
+  /**
+   * The todo item data to display
+   */
+  item: TodoItemType;
+  
+  /**
+   * The ID of the list containing this item
+   */
+  listId: string;
+  
+  /**
+   * Optional callback when item is deleted
+   */
+  onDeleted?: () => void;
+  
+  /**
+   * Optional callback when item is edited
+   */
+  onEdit?: (item: TodoItemType) => void;
+  
+  /**
+   * Optional className for additional styling
+   */
+  className?: string;
+  
+  /**
+   * Whether to show order indicator (for debugging)
+   * @default false
+   */
+  showOrder?: boolean;
+}
+
+/**
+ * TodoItem Component
+ * 
+ * Displays a single todo item with:
+ * - Title and description
+ * - Completion checkbox
+ * - Due date (if present)
+ * - Edit and delete buttons
+ * - Order indicator (optional, for debugging)
+ * 
+ * Handles completion toggle and delete operations using React Query mutations.
+ * 
+ * @example
+ * ```tsx
+ * <TodoItem
+ *   item={item}
+ *   listId={listId}
+ *   onEdit={(item) => console.log('Edit:', item)}
+ *   onDeleted={() => console.log('Deleted')}
+ * />
+ * ```
+ */
+const TodoItem: React.FC<TodoItemProps> = ({
+  item,
+  listId,
+  onDeleted,
+  onEdit,
+  className = '',
+  showOrder = false,
+}) => {
+  // Completion toggle mutation
+  const markComplete = useMarkItemComplete();
+  
+  // Delete item mutation
+  const deleteItem = useDeleteItem();
+  
+  /**
+   * Handle completion checkbox toggle
+   */
+  const handleToggleComplete = () => {
+    markComplete.mutate(
+      {
+        listId,
+        itemId: item.id,
+        isCompleted: !item.isCompleted,
+      },
+      {
+        onError: (error) => {
+          console.error('Failed to toggle item completion:', error);
+        },
+      }
+    );
+  };
+  
+  /**
+   * Handle delete button click
+   */
+  const handleDelete = () => {
+    if (window.confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
+      deleteItem.mutate(
+        { listId, itemId: item.id },
+        {
+          onSuccess: () => {
+            onDeleted?.();
+          },
+          onError: (error) => {
+            console.error('Failed to delete item:', error);
+          },
+        }
+      );
+    }
+  };
+  
+  /**
+   * Handle edit button click
+   */
+  const handleEdit = () => {
+    onEdit?.(item);
+  };
+  
+  /**
+   * Format due date for display
+   */
+  const formatDueDate = (dateString: string | null): string | null => {
+    if (!dateString) return null;
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+  
+  /**
+   * Check if due date is overdue
+   */
+  const isOverdue = (): boolean => {
+    if (!item.dueDate || item.isCompleted) return false;
+    const dueDate = new Date(item.dueDate);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    return dueDate < today;
+  };
+  
+  const dueDateFormatted = formatDueDate(item.dueDate);
+  const overdue = isOverdue();
+  
+  return (
+    <Card
+      padding="md"
+      className={`hover:shadow-lg transition-shadow ${className} ${
+        item.isCompleted ? 'opacity-75' : ''
+      }`}
+    >
+      <div className="flex items-start gap-4">
+        {/* Completion Checkbox */}
+        <div className="flex-shrink-0 pt-1">
+          <input
+            type="checkbox"
+            checked={item.isCompleted}
+            onChange={handleToggleComplete}
+            disabled={markComplete.isPending}
+            className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            aria-label={`Mark "${item.title}" as ${item.isCompleted ? 'incomplete' : 'complete'}`}
+          />
+        </div>
+        
+        {/* Item Content */}
+        <div className="flex-1 min-w-0">
+          {/* Title and Status Badge */}
+          <div className="flex items-center gap-3 mb-2">
+            <h3
+              className={`text-lg font-medium flex-1 ${
+                item.isCompleted
+                  ? 'text-gray-500 line-through'
+                  : 'text-gray-900'
+              }`}
+            >
+              {item.title}
+            </h3>
+            {item.isCompleted && (
+              <span
+                className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full flex-shrink-0"
+                aria-label="Item completed"
+              >
+                Done
+              </span>
+            )}
+            {overdue && !item.isCompleted && (
+              <span
+                className="text-xs font-medium text-red-600 bg-red-50 px-2 py-1 rounded-full flex-shrink-0"
+                aria-label="Item overdue"
+              >
+                Overdue
+              </span>
+            )}
+          </div>
+          
+          {/* Description */}
+          {item.description && (
+            <p
+              className={`text-sm mb-2 ${
+                item.isCompleted ? 'text-gray-400' : 'text-gray-600'
+              }`}
+            >
+              {item.description}
+            </p>
+          )}
+          
+          {/* Metadata Row */}
+          <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+            {dueDateFormatted && (
+              <span className={overdue && !item.isCompleted ? 'text-red-600 font-medium' : ''}>
+                Due: {dueDateFormatted}
+              </span>
+            )}
+            {showOrder && (
+              <span className="text-gray-400">Order: {item.order}</span>
+            )}
+          </div>
+          
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleEdit}
+              aria-label={`Edit item "${item.title}"`}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={handleDelete}
+              disabled={deleteItem.isPending}
+              loading={deleteItem.isPending}
+              aria-label={`Delete item "${item.title}"`}
+            >
+              {deleteItem.isPending ? 'Deleting...' : 'Delete'}
+            </Button>
+          </div>
+          
+          {/* Error Messages */}
+          {markComplete.error && (
+            <div className="mt-2 text-xs text-red-600">
+              Failed to update completion status. Please try again.
+            </div>
+          )}
+          {deleteItem.error && (
+            <div className="mt-2 text-xs text-red-600">
+              {(deleteItem.error as any)?.response?.data?.title ||
+                (deleteItem.error as any)?.response?.data?.detail ||
+                (deleteItem.error as any)?.message ||
+                'Failed to delete item. Please try again.'}
+            </div>
+          )}
+        </div>
+      </div>
+    </Card>
+  );
+};
+
+export default TodoItem;

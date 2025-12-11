@@ -12,6 +12,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import TodoListsPage from './pages/TodoListsPage';
+import TodoListDetailPage from './pages/TodoListDetailPage';
 
 /**
  * App Component
@@ -21,6 +22,7 @@ import TodoListsPage from './pages/TodoListsPage';
  * - `/login` - Login page (redirects if authenticated)
  * - `/register` - Register page (redirects if authenticated)
  * - `/lists` - Todo lists page (protected route)
+ * - `/lists/:id` - Todo list detail page (protected route)
  * - `*` - 404 handler
  */
 function App() {
@@ -54,6 +56,14 @@ function App() {
           element={
             <ProtectedRoute>
               <TodoListsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/lists/:id"
+          element={
+            <ProtectedRoute>
+              <TodoListDetailPage />
             </ProtectedRoute>
           }
         />
