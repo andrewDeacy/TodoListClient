@@ -8,13 +8,17 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useAuth } from '../context/AuthContext';
 import { useTodoList, useDeleteList } from '../hooks/useTodoLists';
-import { useTodoItems } from '../hooks/useTodoItems';
+import { useTodoItems, useReorderItems } from '../hooks/useTodoItems';
 import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui';
-import TodoItem from '../components/TodoItem';
+import SortableTodoItem from '../components/SortableTodoItem';
 import EditListForm from '../components/EditListForm';
-import type { TodoItem as TodoItemType } from '../types/api';
+import CreateItemForm from '../components/CreateItemForm';
+import EditItemForm from '../components/EditItemForm';
+import type { TodoItem as TodoItemType, ReorderItemsRequest } from '../types/api';
 
 /**
  * Todo List Detail Page Component
@@ -44,8 +48,17 @@ const TodoListDetailPage: React.FC = () => {
   // Delete list mutation
   const deleteList = useDeleteList();
   
+  // Reorder items mutation
+  const reorderItems = useReorderItems();
+  
   // Edit form state
   const [showEditForm, setShowEditForm] = useState(false);
+  
+  // Create item form state
+  const [showCreateItemForm, setShowCreateItemForm] = useState(false);
+  
+  // Edit item form state
+  const [editingItem, setEditingItem] = useState<TodoItemType | null>(null);
   
   /**
    * Handle logout
@@ -84,10 +97,46 @@ const TodoListDetailPage: React.FC = () => {
   
   /**
    * Handle add item button click
-   * TODO: Open create item form/modal (will be implemented in TASK-20)
    */
   const handleAddItem = () => {
-    alert('Create item form will be implemented in TASK-20');
+    setShowCreateItemForm(true);
+  };
+  
+  /**
+   * Handle create item form success
+   */
+  const handleCreateItemSuccess = () => {
+    setShowCreateItemForm(false);
+    // Items will be automatically refetched via React Query
+  };
+  
+  /**
+   * Handle create item form cancel
+   */
+  const handleCreateItemCancel = () => {
+    setShowCreateItemForm(false);
+  };
+  
+  /**
+   * Handle edit item button click
+   */
+  const handleEditItem = (item: TodoItemType) => {
+    setEditingItem(item);
+  };
+  
+  /**
+   * Handle edit item form success
+   */
+  const handleEditItemSuccess = () => {
+    setEditingItem(null);
+    // Items will be automatically refetched via React Query
+  };
+  
+  /**
+   * Handle edit item form cancel
+   */
+  const handleEditItemCancel = () => {
+    setEditingItem(null);
   };
   
   /**
@@ -253,6 +302,118 @@ const TodoListDetailPage: React.FC = () => {
   // Sort items by order (lower values first)
   const sortedItems = [...displayItems].sort((a, b) => a.order - b.order);
   
+  /**
+   * Handle moving an item up
+   */
+  const handleMoveUp = (itemIndex: number) => {
+    if (!id || itemIndex === 0 || sortedItems.length < 2) return;
+    
+    const itemToMove = sortedItems[itemIndex];
+    const itemAbove = sortedItems[itemIndex - 1];
+    
+    // Swap orders
+    const newOrders: Record<string, number> = {};
+    sortedItems.forEach((item, idx) => {
+      if (idx === itemIndex) {
+        newOrders[item.id] = itemAbove.order;
+      } else if (idx === itemIndex - 1) {
+        newOrders[item.id] = itemToMove.order;
+      } else {
+        newOrders[item.id] = item.order;
+      }
+    });
+    
+    const requestData: ReorderItemsRequest = {
+      itemOrders: newOrders,
+    };
+    
+    reorderItems.mutate(
+      { listId: id, data: requestData },
+      {
+        onError: (error) => {
+          console.error('Failed to reorder items:', error);
+        },
+      }
+    );
+  };
+  
+  /**
+   * Handle moving an item down
+   */
+  const handleMoveDown = (itemIndex: number) => {
+    if (!id || itemIndex === sortedItems.length - 1 || sortedItems.length < 2) return;
+    
+    const itemToMove = sortedItems[itemIndex];
+    const itemBelow = sortedItems[itemIndex + 1];
+    
+    // Swap orders
+    const newOrders: Record<string, number> = {};
+    sortedItems.forEach((item, idx) => {
+      if (idx === itemIndex) {
+        newOrders[item.id] = itemBelow.order;
+      } else if (idx === itemIndex + 1) {
+        newOrders[item.id] = itemToMove.order;
+      } else {
+        newOrders[item.id] = item.order;
+      }
+    });
+    
+    const requestData: ReorderItemsRequest = {
+      itemOrders: newOrders,
+    };
+    
+    reorderItems.mutate(
+      { listId: id, data: requestData },
+      {
+        onError: (error) => {
+          console.error('Failed to reorder items:', error);
+        },
+      }
+    );
+  };
+  
+  /**
+   * Handle drag end event from drag-and-drop
+   */
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    
+    if (!id || !over || active.id === over.id) {
+      return;
+    }
+    
+    const oldIndex = sortedItems.findIndex((item) => item.id === active.id);
+    const newIndex = sortedItems.findIndex((item) => item.id === over.id);
+    
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+    
+    // Create new order mapping
+    const newOrders: Record<string, number> = {};
+    const reorderedItems = [...sortedItems];
+    const [movedItem] = reorderedItems.splice(oldIndex, 1);
+    reorderedItems.splice(newIndex, 0, movedItem);
+    
+    // Assign new orders based on new positions
+    reorderedItems.forEach((item, idx) => {
+      newOrders[item.id] = idx;
+    });
+    
+    const requestData: ReorderItemsRequest = {
+      itemOrders: newOrders,
+    };
+    
+    reorderItems.mutate(
+      { listId: id, data: requestData },
+      {
+        onError: (error) => {
+          console.error('Failed to reorder items:', error);
+        },
+      }
+    );
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
@@ -280,7 +441,7 @@ const TodoListDetailPage: React.FC = () => {
       
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Edit Form Modal Overlay */}
+        {/* Edit List Form Modal Overlay */}
         {showEditForm && list && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
@@ -288,6 +449,33 @@ const TodoListDetailPage: React.FC = () => {
                 list={list}
                 onCancel={handleEditCancel}
                 onSuccess={handleEditSuccess}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Create Item Form Modal Overlay */}
+        {showCreateItemForm && list && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <CreateItemForm
+                listId={list.id}
+                onCancel={handleCreateItemCancel}
+                onSuccess={handleCreateItemSuccess}
+              />
+            </div>
+          </div>
+        )}
+        
+        {/* Edit Item Form Modal Overlay */}
+        {editingItem && list && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <EditItemForm
+                item={editingItem}
+                listId={list.id}
+                onCancel={handleEditItemCancel}
+                onSuccess={handleEditItemSuccess}
               />
             </div>
           </div>
@@ -365,6 +553,20 @@ const TodoListDetailPage: React.FC = () => {
           )}
         </Card>
         
+        {/* Reorder Error Message */}
+        {reorderItems.error && (
+          <div className="mb-4">
+            <ErrorMessage
+              message={
+                (reorderItems.error as any)?.response?.data?.title ||
+                (reorderItems.error as any)?.response?.data?.detail ||
+                (reorderItems.error as any)?.message ||
+                'Failed to reorder items. Please try again.'
+              }
+            />
+          </div>
+        )}
+        
         {/* Items Error State */}
         {itemsError && !isLoadingItems && (
           <ErrorMessage
@@ -396,18 +598,33 @@ const TodoListDetailPage: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
               Items ({sortedItems.length})
             </h2>
-            {sortedItems.map((item) => (
-              <TodoItem
-                key={item.id}
-                item={item}
-                listId={list.id}
-                onEdit={(item) => {
-                  // TODO: Open edit item form/modal (will be implemented in TASK-20)
-                  alert(`Edit item form will be implemented in TASK-20 for: ${item.title}`);
-                }}
-                showOrder={false} // Set to true for debugging if needed
-              />
-            ))}
+            <DndContext
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <SortableContext
+                items={sortedItems.map((item) => item.id)}
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-3">
+                  {sortedItems.map((item, index) => (
+                    <SortableTodoItem
+                      key={item.id}
+                      id={item.id}
+                      item={item}
+                      listId={list.id}
+                      onEdit={handleEditItem}
+                      showOrder={false} // Set to true for debugging if needed
+                      isFirst={index === 0}
+                      isLast={index === sortedItems.length - 1}
+                      onMoveUp={() => handleMoveUp(index)}
+                      onMoveDown={() => handleMoveDown(index)}
+                      isReordering={reorderItems.isPending}
+                    />
+                  ))}
+                </div>
+              </SortableContext>
+            </DndContext>
           </div>
         )}
       </main>

@@ -44,6 +44,34 @@ export interface TodoItemProps {
    * @default false
    */
   showOrder?: boolean;
+  
+  /**
+   * Whether this item is the first item in the list
+   * @default false
+   */
+  isFirst?: boolean;
+  
+  /**
+   * Whether this item is the last item in the list
+   * @default false
+   */
+  isLast?: boolean;
+  
+  /**
+   * Callback when item should be moved up
+   */
+  onMoveUp?: () => void;
+  
+  /**
+   * Callback when item should be moved down
+   */
+  onMoveDown?: () => void;
+  
+  /**
+   * Whether reordering is in progress
+   * @default false
+   */
+  isReordering?: boolean;
 }
 
 /**
@@ -75,6 +103,11 @@ const TodoItem: React.FC<TodoItemProps> = ({
   onEdit,
   className = '',
   showOrder = false,
+  isFirst = false,
+  isLast = false,
+  onMoveUp,
+  onMoveDown,
+  isReordering = false,
 }) => {
   // Completion toggle mutation
   const markComplete = useMarkItemComplete();
@@ -227,12 +260,39 @@ const TodoItem: React.FC<TodoItemProps> = ({
             )}
           </div>
           
+          {/* Reordering Controls */}
+          {(onMoveUp || onMoveDown) && (
+            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onMoveUp}
+                disabled={isFirst || isReordering || markComplete.isPending || deleteItem.isPending}
+                aria-label={`Move "${item.title}" up`}
+                title="Move up"
+              >
+                ↑ Move Up
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onMoveDown}
+                disabled={isLast || isReordering || markComplete.isPending || deleteItem.isPending}
+                aria-label={`Move "${item.title}" down`}
+                title="Move down"
+              >
+                ↓ Move Down
+              </Button>
+            </div>
+          )}
+          
           {/* Action Buttons */}
           <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
             <Button
               variant="secondary"
               size="sm"
               onClick={handleEdit}
+              disabled={isReordering}
               aria-label={`Edit item "${item.title}"`}
             >
               Edit
@@ -241,7 +301,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
               variant="danger"
               size="sm"
               onClick={handleDelete}
-              disabled={deleteItem.isPending}
+              disabled={deleteItem.isPending || isReordering}
               loading={deleteItem.isPending}
               aria-label={`Delete item "${item.title}"`}
             >
