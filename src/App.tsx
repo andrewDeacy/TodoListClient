@@ -1,23 +1,15 @@
 function App() {
   return (
-    <div style={{ 
-      minHeight: '100vh', 
-      display: 'flex', 
-      alignItems: 'center', 
-      justifyContent: 'center',
-      backgroundColor: '#f9fafb'
-    }}>
-      <div style={{ textAlign: 'center' }}>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: 'bold', 
-          marginBottom: '1rem',
-          color: '#111827'
-        }}>
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="text-center">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Todo List App
         </h1>
-        <p style={{ color: '#6b7280' }}>
+        <p className="text-gray-600">
           React + TypeScript + Vite project initialized successfully
+        </p>
+        <p className="text-sm text-gray-500 mt-2">
+          Tailwind CSS is working! 🎨
         </p>
       </div>
     </div>
