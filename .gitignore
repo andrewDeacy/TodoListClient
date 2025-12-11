@@ -43,3 +43,6 @@ lerna-debug.log*
 
 # TypeScript
 *.tsbuildinfo
+
+# Cursor AI output and coordination files
+.cursor-output/
