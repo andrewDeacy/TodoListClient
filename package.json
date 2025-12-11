@@ -4,6 +4,7 @@
   "description": "A production-quality React frontend application for managing todo lists and todo items. Built with React 18+, TypeScript, React Query, and modern best practices.",
   "main": "index.js",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.90.12",
     "axios": "^1.13.2",
     "baseline-browser-mapping": "^2.9.6",
