@@ -415,7 +415,7 @@ const TodoListDetailPage: React.FC = () => {
   };
   
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 w-full max-w-full overflow-x-hidden">
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -443,8 +443,8 @@ const TodoListDetailPage: React.FC = () => {
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Edit List Form Modal Overlay */}
         {showEditForm && list && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
               <EditListForm
                 list={list}
                 onCancel={handleEditCancel}
@@ -456,8 +456,8 @@ const TodoListDetailPage: React.FC = () => {
         
         {/* Create Item Form Modal Overlay */}
         {showCreateItemForm && list && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
               <CreateItemForm
                 listId={list.id}
                 onCancel={handleCreateItemCancel}
@@ -469,8 +469,8 @@ const TodoListDetailPage: React.FC = () => {
         
         {/* Edit Item Form Modal Overlay */}
         {editingItem && list && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+            <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
               <EditItemForm
                 item={editingItem}
                 listId={list.id}
@@ -484,9 +484,9 @@ const TodoListDetailPage: React.FC = () => {
         {/* List Header Card */}
         <Card padding="lg" className="mb-6">
           <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
+            <div className="flex-1 min-w-0 overflow-hidden">
               <div className="flex items-center gap-3 mb-2">
-                <h1 className="text-3xl font-bold text-gray-900">{list.name}</h1>
+                <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 break-words min-w-0">{list.name}</h1>
                 {list.isCompleted && (
                   <span
                     className="text-xs font-medium text-green-600 bg-green-50 px-2 py-1 rounded-full"
@@ -497,7 +497,7 @@ const TodoListDetailPage: React.FC = () => {
                 )}
               </div>
               {list.description && (
-                <p className="text-gray-600 mb-4">{list.description}</p>
+                <p className="text-gray-600 mb-4 break-words">{list.description}</p>
               )}
               <div className="text-sm text-gray-500">
                 <span>Created {formatDate(list.createdDate)}</span>

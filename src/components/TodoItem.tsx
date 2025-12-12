@@ -207,11 +207,11 @@ const TodoItem: React.FC<TodoItemProps> = ({
         </div>
         
         {/* Item Content */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden">
           {/* Title and Status Badge */}
           <div className="flex items-center gap-3 mb-2">
             <h3
-              className={`text-lg font-medium flex-1 ${
+              className={`text-lg font-medium flex-1 min-w-0 break-words ${
                 item.isCompleted
                   ? 'text-gray-500 line-through'
                   : 'text-gray-900'
@@ -240,7 +240,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
           {/* Description */}
           {item.description && (
             <p
-              className={`text-sm mb-2 ${
+              className={`text-sm mb-2 break-words ${
                 item.isCompleted ? 'text-gray-400' : 'text-gray-600'
               }`}
             >
