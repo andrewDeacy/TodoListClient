@@ -12,6 +12,7 @@ import { useAuth } from '../context/AuthContext';
 import { useTodoLists } from '../hooks/useTodoLists';
 import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui';
 import CreateListForm from '../components/CreateListForm';
+import Logo from '../components/Logo';
 import type { TodoList } from '../types/api';
 
 /**
@@ -101,7 +102,7 @@ const TodoListsPage: React.FC = () => {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Todo Lists</h1>
+            <Logo />
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {user && (
                 <div className="hidden sm:flex items-center text-sm text-gray-600">

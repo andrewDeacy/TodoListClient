@@ -6,18 +6,19 @@
  * Provides actions to add items, edit list, and delete list.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useAuth } from '../context/AuthContext';
 import { useTodoList, useDeleteList } from '../hooks/useTodoLists';
 import { useTodoItems, useReorderItems } from '../hooks/useTodoItems';
-import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState, DeleteConfirmationModal } from '../components/ui';
+import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState, DeleteConfirmationModal, Input } from '../components/ui';
 import SortableTodoItem from '../components/SortableTodoItem';
 import EditListForm from '../components/EditListForm';
 import CreateItemForm from '../components/CreateItemForm';
 import EditItemForm from '../components/EditItemForm';
+import Logo from '../components/Logo';
 import type { TodoItem as TodoItemType, ReorderItemsRequest } from '../types/api';
 
 /**
@@ -68,6 +69,9 @@ const TodoListDetailPage: React.FC = () => {
   
   // Delete list confirmation modal state
   const [showDeleteListModal, setShowDeleteListModal] = useState(false);
+  
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
   
   /**
    * Handle logout
@@ -198,6 +202,26 @@ const TodoListDetailPage: React.FC = () => {
     });
   };
   
+  // Get items (use items from hook if available, otherwise use items from list)
+  // This must be calculated before early returns to ensure hooks are called in same order
+  const displayItems: TodoItemType[] = items || list?.items || [];
+  
+  // Sort items by order (lower values first)
+  const sortedItems = [...displayItems].sort((a, b) => a.order - b.order);
+  
+  // Filter items based on search term (case-insensitive search on title and description)
+  // This useMemo MUST be called before any early returns to follow Rules of Hooks
+  const filteredItems = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return sortedItems;
+    }
+    const term = searchTerm.toLowerCase().trim();
+    return sortedItems.filter(item => {
+      const titleMatch = item.title.toLowerCase().includes(term);
+      const descMatch = item.description?.toLowerCase().includes(term) || false;
+      return titleMatch || descMatch;
+    });
+  }, [sortedItems, searchTerm]);
   
   // Determine loading state (either list or items loading)
   const isLoading = isLoadingList || isLoadingItems;
@@ -212,16 +236,14 @@ const TodoListDetailPage: React.FC = () => {
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" onClick={handleBack}>
-                ← Back
-              </Button>
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-4">
+              <Logo />
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 {user && (
-                  <div className="text-sm text-gray-600">
+                  <div className="hidden sm:flex items-center text-sm text-gray-600">
                     <span className="font-medium">{user.username}</span>
                     <span className="mx-2">•</span>
-                    <span className="text-gray-500">{user.email}</span>
+                    <span className="text-gray-500 truncate max-w-[120px] lg:max-w-none">{user.email}</span>
                   </div>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -234,6 +256,11 @@ const TodoListDetailPage: React.FC = () => {
         
         {/* Loading State */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-4">
+            <Button variant="ghost" size="sm" onClick={handleBack}>
+              ← Back
+            </Button>
+          </div>
           <div className="flex justify-center items-center py-12">
             <LoadingSpinner size="lg" text="Loading todo list..." />
           </div>
@@ -249,16 +276,14 @@ const TodoListDetailPage: React.FC = () => {
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" onClick={handleBack}>
-                ← Back
-              </Button>
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-4">
+              <Logo />
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 {user && (
-                  <div className="text-sm text-gray-600">
+                  <div className="hidden sm:flex items-center text-sm text-gray-600">
                     <span className="font-medium">{user.username}</span>
                     <span className="mx-2">•</span>
-                    <span className="text-gray-500">{user.email}</span>
+                    <span className="text-gray-500 truncate max-w-[120px] lg:max-w-none">{user.email}</span>
                   </div>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -271,6 +296,11 @@ const TodoListDetailPage: React.FC = () => {
         
         {/* Error State */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-4">
+            <Button variant="ghost" size="sm" onClick={handleBack}>
+              ← Back
+            </Button>
+          </div>
           <ErrorMessage
             message={
               (error as any)?.response?.data?.title ||
@@ -291,16 +321,14 @@ const TodoListDetailPage: React.FC = () => {
         {/* Header */}
         <header className="bg-white shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <div className="flex items-center justify-between">
-              <Button variant="ghost" size="sm" onClick={handleBack}>
-                ← Back
-              </Button>
-              <div className="flex items-center gap-4">
+            <div className="flex items-center justify-between gap-4">
+              <Logo />
+              <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
                 {user && (
-                  <div className="text-sm text-gray-600">
+                  <div className="hidden sm:flex items-center text-sm text-gray-600">
                     <span className="font-medium">{user.username}</span>
                     <span className="mx-2">•</span>
-                    <span className="text-gray-500">{user.email}</span>
+                    <span className="text-gray-500 truncate max-w-[120px] lg:max-w-none">{user.email}</span>
                   </div>
                 )}
                 <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -313,17 +341,30 @@ const TodoListDetailPage: React.FC = () => {
         
         {/* Error State */}
         <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-4">
+            <Button variant="ghost" size="sm" onClick={handleBack}>
+              ← Back
+            </Button>
+          </div>
           <ErrorMessage message="Todo list not found." />
         </main>
       </div>
     );
   }
   
-  // Get items (use items from hook if available, otherwise use items from list)
-  const displayItems: TodoItemType[] = items || list.items || [];
+  /**
+   * Handle search input change
+   */
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
   
-  // Sort items by order (lower values first)
-  const sortedItems = [...displayItems].sort((a, b) => a.order - b.order);
+  /**
+   * Clear search term
+   */
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
   
   /**
    * Handle moving an item up
@@ -472,9 +513,7 @@ const TodoListDetailPage: React.FC = () => {
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between gap-4">
-            <Button variant="ghost" size="sm" onClick={handleBack}>
-              ← Back
-            </Button>
+            <Logo />
             <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {user && (
                 <div className="hidden sm:flex items-center text-sm text-gray-600">
@@ -493,6 +532,12 @@ const TodoListDetailPage: React.FC = () => {
       
       {/* Main Content */}
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Back Button - Below Nav Bar */}
+        <div className="mb-4">
+          <Button variant="ghost" size="sm" onClick={handleBack}>
+            ← Back
+          </Button>
+        </div>
         {/* Edit List Form Modal Overlay */}
         {showEditForm && list && (
           <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto">
@@ -619,6 +664,56 @@ const TodoListDetailPage: React.FC = () => {
           </div>
         )}
         
+        {/* Search Bar - Below List Details Card */}
+        {!isLoadingItems && !itemsError && sortedItems.length > 0 && (
+          <div className="mb-6">
+            <div className="relative">
+              <Input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Search items by title or description..."
+                aria-label="Search items"
+                className="w-full"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="mt-2 text-sm text-gray-600">
+                {filteredItems.length === 0 ? (
+                  <span>No items match "{searchTerm}"</span>
+                ) : (
+                  <span>
+                    {filteredItems.length} {filteredItems.length === 1 ? 'item' : 'items'} found
+                  </span>
+                )}
+              </p>
+            )}
+          </div>
+        )}
+        
         {/* Items Error State */}
         {itemsError && !isLoadingItems && (
           <ErrorMessage
@@ -631,7 +726,7 @@ const TodoListDetailPage: React.FC = () => {
           />
         )}
         
-        {/* Empty State - No Items */}
+        {/* Empty State - No Items (when no items exist) */}
         {!isLoadingItems && !itemsError && sortedItems.length === 0 && (
           <EmptyState
             title="No items yet"
@@ -660,11 +755,40 @@ const TodoListDetailPage: React.FC = () => {
           />
         )}
         
+        {/* Empty State - No Search Results */}
+        {!isLoadingItems && !itemsError && sortedItems.length > 0 && searchTerm && filteredItems.length === 0 && (
+          <EmptyState
+            title="No items match your search"
+            message={`No items found matching "${searchTerm}". Try a different search term.`}
+            icon={
+              <svg
+                className="w-16 h-16 text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            }
+            action={
+              <Button variant="secondary" size="md" onClick={handleClearSearch}>
+                Clear Search
+              </Button>
+            }
+          />
+        )}
+        
         {/* Items List */}
-        {!isLoadingItems && !itemsError && sortedItems.length > 0 && (
+        {!isLoadingItems && !itemsError && sortedItems.length > 0 && filteredItems.length > 0 && (
           <div className="space-y-3">
             <h2 className="text-xl font-semibold text-gray-900 mb-4">
-              Items ({sortedItems.length})
+              Items {searchTerm ? `(${filteredItems.length} of ${sortedItems.length})` : `(${sortedItems.length})`}
             </h2>
             <DndContext
               collisionDetection={closestCenter}
@@ -673,11 +797,14 @@ const TodoListDetailPage: React.FC = () => {
               onDragCancel={handleDragCancel}
             >
               <SortableContext
-                items={sortedItems.map((item) => item.id)}
+                items={filteredItems.map((item) => item.id)}
                 strategy={verticalListSortingStrategy}
               >
                 <div className="space-y-3">
-                  {sortedItems.map((item, index) => (
+                  {filteredItems.map((item) => {
+                    // Find original index in sortedItems for position calculation
+                    const originalIndex = sortedItems.findIndex(i => i.id === item.id);
+                    return (
                     <SortableTodoItem
                       key={item.id}
                       id={item.id}
@@ -685,15 +812,16 @@ const TodoListDetailPage: React.FC = () => {
                       listId={list.id}
                       onEdit={handleEditItem}
                       showOrder={false} // Set to true for debugging if needed
-                      isFirst={index === 0}
-                      isLast={index === sortedItems.length - 1}
-                      onMoveUp={() => handleMoveUp(index)}
-                      onMoveDown={() => handleMoveDown(index)}
+                      isFirst={originalIndex === 0}
+                      isLast={originalIndex === sortedItems.length - 1}
+                      onMoveUp={() => handleMoveUp(originalIndex)}
+                      onMoveDown={() => handleMoveDown(originalIndex)}
                       isReordering={reorderItems.isPending}
-                      position={index + 1} // 1-based position for display
+                      position={originalIndex + 1} // 1-based position for display
                       isRecentlyMoved={recentlyMovedId === item.id}
                     />
-                  ))}
+                    );
+                  })}
                 </div>
               </SortableContext>
               <DragOverlay
@@ -701,7 +829,7 @@ const TodoListDetailPage: React.FC = () => {
               >
                 {activeId ? (
                   (() => {
-                    const activeItem = sortedItems.find((item) => item.id === activeId);
+                    const activeItem = filteredItems.find((item) => item.id === activeId) || sortedItems.find((item) => item.id === activeId);
                     const activeIndex = sortedItems.findIndex((item) => item.id === activeId);
                     if (!activeItem) return null;
                     return (
