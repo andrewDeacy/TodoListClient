@@ -2,14 +2,10 @@
 
 A React frontend application for managing todo lists and todo items. Built with React 19+, TypeScript, React Query, and Tailwind CSS.
 
-## Requirements Overview
-
-[Placeholder: Insert Reqs.png mind map here]
-
 ## Prerequisites
 
 - Node.js 20.19+ or 22.12+ and npm
-- Backend API running (see `../TodoListAPI/README.md`)
+- Backend API running (see [TodoListAPI](https://github.com/andrewDeacy/TodoListAPI))
 
 Verify installation:
 ```bash
@@ -22,7 +18,7 @@ node --version
 ### 1. Clone and Navigate
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/andrewDeacy/TodoListClient.git
 cd TodoListClient
 ```
 
@@ -44,10 +40,11 @@ Default is `http://localhost:5074` - only create `.env` if needed.
 
 ### 4. Start Backend API
 
-Ensure the backend is running before starting the frontend:
+Ensure the backend API is running before starting the frontend. Clone and run the [TodoListAPI](https://github.com/andrewDeacy/TodoListAPI) repository:
 
 ```bash
-cd ../TodoListAPI/TodoListAPI.Api
+git clone https://github.com/andrewDeacy/TodoListAPI.git
+cd TodoListAPI/TodoListAPI.Api
 dotnet run
 ```
 
@@ -72,7 +69,7 @@ npm run test:ui  # Run tests with UI
 
 ## Application Demo
 
-[Placeholder: Insert GIF of application working here]
+![Todo App Demo](todo-app-rec%20copy.gif)
 
 ## Project Structure
 
@@ -153,6 +150,10 @@ If given more time:
 - Verify Node.js version (20.19+ or 22.12+)
 - Ensure all dependencies are installed
 - Check `vite.config.ts` test configuration
+
+## Related Projects
+
+- [TodoListAPI](https://github.com/andrewDeacy/TodoListAPI) - Backend API (.NET 8.0)
 
 ---
 
