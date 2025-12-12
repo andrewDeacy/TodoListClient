@@ -193,10 +193,15 @@ const Register: React.FC = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                disabled={isRegistering}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors ${
                   validationErrors.email
                     ? 'border-red-500'
                     : 'border-gray-300'
+                } ${
+                  isRegistering
+                    ? 'bg-gray-100 cursor-not-allowed opacity-60'
+                    : ''
                 }`}
                 placeholder="Enter your email"
                 aria-invalid={!!validationErrors.email}
@@ -227,10 +232,15 @@ const Register: React.FC = () => {
                 name="username"
                 value={formData.username}
                 onChange={handleChange}
+                disabled={isRegistering}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors ${
                   validationErrors.username
                     ? 'border-red-500'
                     : 'border-gray-300'
+                } ${
+                  isRegistering
+                    ? 'bg-gray-100 cursor-not-allowed opacity-60'
+                    : ''
                 }`}
                 placeholder="Choose a username"
                 aria-invalid={!!validationErrors.username}
@@ -262,10 +272,15 @@ const Register: React.FC = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={isRegistering}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors pr-12 ${
                     validationErrors.password
                       ? 'border-red-500'
                       : 'border-gray-300'
+                  } ${
+                    isRegistering
+                      ? 'bg-gray-100 cursor-not-allowed opacity-60'
+                      : ''
                   }`}
                   placeholder="Create a password"
                   aria-invalid={!!validationErrors.password}
@@ -306,10 +321,15 @@ const Register: React.FC = () => {
                   name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
+                  disabled={isRegistering}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors pr-12 ${
                     validationErrors.confirmPassword
                       ? 'border-red-500'
                       : 'border-gray-300'
+                  } ${
+                    isRegistering
+                      ? 'bg-gray-100 cursor-not-allowed opacity-60'
+                      : ''
                   }`}
                   placeholder="Confirm your password"
                   aria-invalid={!!validationErrors.confirmPassword}

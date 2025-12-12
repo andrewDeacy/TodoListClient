@@ -20,7 +20,6 @@
     "esbuild": "^0.25.12",
     "escalade": "^3.2.0",
     "fdir": "^6.5.0",
-    "fsevents": "^2.3.3",
     "gensync": "^1.0.0-beta.2",
     "js-tokens": "^4.0.0",
     "jsesc": "^3.1.0",
@@ -77,5 +76,8 @@
     "tailwindcss": "^4.1.17",
     "typescript": "^5.9.3",
     "vite": "^7.2.7"
+  },
+  "optionalDependencies": {
+    "fsevents": "^2.3.3"
   }
 }

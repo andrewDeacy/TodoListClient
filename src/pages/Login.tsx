@@ -132,10 +132,15 @@ const Login: React.FC = () => {
                 name="emailOrUsername"
                 value={formData.emailOrUsername}
                 onChange={handleChange}
+                disabled={isLoggingIn}
                 className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors ${
                   validationErrors.emailOrUsername
                     ? 'border-red-500'
                     : 'border-gray-300'
+                } ${
+                  isLoggingIn
+                    ? 'bg-gray-100 cursor-not-allowed opacity-60'
+                    : ''
                 }`}
                 placeholder="Enter your email or username"
                 aria-invalid={!!validationErrors.emailOrUsername}
@@ -167,10 +172,15 @@ const Login: React.FC = () => {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
+                  disabled={isLoggingIn}
                   className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-gray-900 transition-colors pr-12 ${
                     validationErrors.password
                       ? 'border-red-500'
                       : 'border-gray-300'
+                  } ${
+                    isLoggingIn
+                      ? 'bg-gray-100 cursor-not-allowed opacity-60'
+                      : ''
                   }`}
                   placeholder="Enter your password"
                   aria-invalid={!!validationErrors.password}
@@ -203,7 +213,8 @@ const Login: React.FC = () => {
                   type="checkbox"
                   checked={rememberMe}
                   onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900"
+                  disabled={isLoggingIn}
+                  className="w-4 h-4 text-gray-900 border-gray-300 rounded focus:ring-gray-900 disabled:opacity-60 disabled:cursor-not-allowed"
                 />
                 <span className="ml-2 text-sm text-gray-700">Remember me</span>
               </label>
