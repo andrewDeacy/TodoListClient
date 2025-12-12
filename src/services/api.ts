@@ -8,6 +8,7 @@
  */
 
 import axios, { AxiosInstance, AxiosError, InternalAxiosRequestConfig, AxiosResponse } from 'axios';
+import { getErrorMessage, isNetworkError, isAuthError } from '../utils/errorUtils';
 
 /**
  * Storage key for JWT token in localStorage
@@ -140,6 +141,9 @@ apiClient.interceptors.response.use(
     return response;
   },
   (error: AxiosError) => {
+    // Extract user-friendly error message
+    const errorMessage = getErrorMessage(error);
+
     // Log error response in development mode
     if (isDevelopment()) {
       console.error(`[API Error] ${error.config?.method?.toUpperCase()} ${error.config?.url}`, {
@@ -147,48 +151,56 @@ apiClient.interceptors.response.use(
         statusText: error.response?.statusText,
         data: error.response?.data,
         message: error.message,
+        userMessage: errorMessage,
       });
     }
 
-    // Handle specific error cases
-    if (error.response) {
-      const status = error.response.status;
-
-      // Handle 401 Unauthorized - token may be invalid or expired
-      if (status === 401) {
-        // Clear invalid token
-        tokenStorage.removeToken();
-        
-        // Redirect to login page if not already there
-        // Note: This will be handled by the auth context/routing in a later task
-        // For now, we just clear the token
-        console.warn('Unauthorized request - token cleared. Please login again.');
+    // Handle authentication errors (401 Unauthorized)
+    if (isAuthError(error)) {
+      // Clear invalid token
+      tokenStorage.removeToken();
+      
+      // Log warning in development
+      if (isDevelopment()) {
+        console.warn('Unauthorized request - token cleared. User will be redirected to login.');
       }
 
-      // Handle 403 Forbidden
-      if (status === 403) {
-        console.error('Forbidden: You do not have permission to access this resource.');
+      // Redirect to login page if not already there
+      // Check if we're in a browser environment and not already on login/register pages
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname;
+        if (currentPath !== '/login' && currentPath !== '/register') {
+          // Use setTimeout to avoid navigation during render
+          setTimeout(() => {
+            window.location.href = '/login';
+          }, 0);
+        }
       }
-
-      // Handle 404 Not Found
-      if (status === 404) {
-        console.error('Resource not found.');
-      }
-
-      // Handle 500 Internal Server Error
-      if (status >= 500) {
-        console.error('Server error. Please try again later.');
-      }
-    } else if (error.request) {
-      // Request was made but no response received (network error)
-      console.error('Network error: Unable to reach the server. Please check your connection.');
-    } else {
-      // Something else happened
-      console.error('Request error:', error.message);
     }
 
-    // Return error to be handled by the calling code
-    return Promise.reject(error);
+    // Handle network errors (no response from server)
+    if (isNetworkError(error)) {
+      if (isDevelopment()) {
+        console.error('Network error:', errorMessage);
+      }
+      // Network errors are already handled with user-friendly message
+    }
+
+    // Handle server errors (5xx)
+    if (error.response && error.response.status >= 500) {
+      if (isDevelopment()) {
+        console.error('Server error:', errorMessage);
+      }
+    }
+
+    // Create enhanced error object with user-friendly message
+    const enhancedError = new Error(errorMessage);
+    (enhancedError as any).originalError = error;
+    (enhancedError as any).status = error.response?.status;
+    (enhancedError as any).response = error.response;
+
+    // Return enhanced error to be handled by the calling code
+    return Promise.reject(enhancedError);
   }
 );
 
