@@ -27,8 +27,8 @@ body {
   position: relative;
 }
 
-/* Ensure all containers respect viewport width */
-* {
+/* Ensure all containers respect viewport width - but allow Tailwind max-width classes to override */
+*:not([class*="max-w"]):not([class*="w-"]) {
   max-width: 100%;
 }
 
@@ -49,4 +49,24 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Animation for item movement */
+@keyframes moveItem {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+}
+
+.animate-move-item {
+  animation: moveItem 0.5s ease-in-out;
 }

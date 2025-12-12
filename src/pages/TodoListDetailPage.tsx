@@ -8,7 +8,7 @@
 
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, closestCenter, DragEndEvent, DragStartEvent, DragOverlay } from '@dnd-kit/core';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useAuth } from '../context/AuthContext';
 import { useTodoList, useDeleteList } from '../hooks/useTodoLists';
@@ -35,6 +35,12 @@ const TodoListDetailPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  
+  // State for drag overlay
+  const [activeId, setActiveId] = useState<string | null>(null);
+  
+  // State for tracking recently moved items (for animation)
+  const [recentlyMovedId, setRecentlyMovedId] = useState<string | null>(null);
   
   // Fetch list data
   const { data: list, isLoading: isLoadingList, error: listError } = useTodoList(id || '');
@@ -311,6 +317,10 @@ const TodoListDetailPage: React.FC = () => {
     const itemToMove = sortedItems[itemIndex];
     const itemAbove = sortedItems[itemIndex - 1];
     
+    // Set recently moved ID for animation
+    setRecentlyMovedId(itemToMove.id);
+    setTimeout(() => setRecentlyMovedId(null), 600); // Clear after animation
+    
     // Swap orders
     const newOrders: Record<string, number> = {};
     sortedItems.forEach((item, idx) => {
@@ -346,6 +356,10 @@ const TodoListDetailPage: React.FC = () => {
     const itemToMove = sortedItems[itemIndex];
     const itemBelow = sortedItems[itemIndex + 1];
     
+    // Set recently moved ID for animation
+    setRecentlyMovedId(itemToMove.id);
+    setTimeout(() => setRecentlyMovedId(null), 600); // Clear after animation
+    
     // Swap orders
     const newOrders: Record<string, number> = {};
     sortedItems.forEach((item, idx) => {
@@ -373,10 +387,20 @@ const TodoListDetailPage: React.FC = () => {
   };
   
   /**
+   * Handle drag start event
+   */
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+  
+  /**
    * Handle drag end event from drag-and-drop
    */
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+    
+    // Reset active ID
+    setActiveId(null);
     
     if (!id || !over || active.id === over.id) {
       return;
@@ -388,6 +412,10 @@ const TodoListDetailPage: React.FC = () => {
     if (oldIndex === -1 || newIndex === -1) {
       return;
     }
+    
+    // Trigger animation for the moved item
+    setRecentlyMovedId(active.id as string);
+    setTimeout(() => setRecentlyMovedId(null), 600); // Clear after animation
     
     // Create new order mapping
     const newOrders: Record<string, number> = {};
@@ -412,6 +440,13 @@ const TodoListDetailPage: React.FC = () => {
         },
       }
     );
+  };
+  
+  /**
+   * Handle drag cancel event
+   */
+  const handleDragCancel = () => {
+    setActiveId(null);
   };
   
   return (
@@ -616,7 +651,9 @@ const TodoListDetailPage: React.FC = () => {
             </h2>
             <DndContext
               collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
+              onDragCancel={handleDragCancel}
             >
               <SortableContext
                 items={sortedItems.map((item) => item.id)}
@@ -636,10 +673,40 @@ const TodoListDetailPage: React.FC = () => {
                       onMoveUp={() => handleMoveUp(index)}
                       onMoveDown={() => handleMoveDown(index)}
                       isReordering={reorderItems.isPending}
+                      position={index + 1} // 1-based position for display
+                      isRecentlyMoved={recentlyMovedId === item.id}
                     />
                   ))}
                 </div>
               </SortableContext>
+              <DragOverlay
+                transition="transform 250ms cubic-bezier(0.25, 1, 0.5, 1)"
+              >
+                {activeId ? (
+                  (() => {
+                    const activeItem = sortedItems.find((item) => item.id === activeId);
+                    const activeIndex = sortedItems.findIndex((item) => item.id === activeId);
+                    if (!activeItem) return null;
+                    return (
+                      <div className="opacity-90 rotate-2 shadow-2xl">
+                        <SortableTodoItem
+                          id={activeItem.id}
+                          item={activeItem}
+                          listId={list.id}
+                          onEdit={handleEditItem}
+                          showOrder={false}
+                          isFirst={activeIndex === 0}
+                          isLast={activeIndex === sortedItems.length - 1}
+                          onMoveUp={() => {}}
+                          onMoveDown={() => {}}
+                          isReordering={false}
+                          position={activeIndex + 1}
+                        />
+                      </div>
+                    );
+                  })()
+                ) : null}
+              </DragOverlay>
             </DndContext>
           </div>
         )}

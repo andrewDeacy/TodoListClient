@@ -72,6 +72,12 @@ export interface TodoItemProps {
    * @default false
    */
   isReordering?: boolean;
+  
+  /**
+   * The position of this item in the list (1-based index for display)
+   * @default undefined
+   */
+  position?: number;
 }
 
 /**
@@ -108,6 +114,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
   onMoveUp,
   onMoveDown,
   isReordering = false,
+  position,
 }) => {
   // Completion toggle mutation
   const markComplete = useMarkItemComplete();
@@ -189,13 +196,14 @@ const TodoItem: React.FC<TodoItemProps> = ({
   return (
     <Card
       padding="md"
-      className={`hover:shadow-lg transition-shadow ${className} ${
+      className={`hover:shadow-lg transition-all duration-300 ease-in-out ${className} ${
         item.isCompleted ? 'opacity-75' : ''
       }`}
     >
       <div className="flex items-start gap-4">
-        {/* Completion Checkbox */}
-        <div className="flex-shrink-0 pt-1">
+        {/* Left Column: Checkbox and Move Controls */}
+        <div className="flex-shrink-0 flex flex-col items-center gap-2 pt-1">
+          {/* Completion Checkbox */}
           <input
             type="checkbox"
             checked={item.isCompleted}
@@ -204,6 +212,73 @@ const TodoItem: React.FC<TodoItemProps> = ({
             className="w-5 h-5 rounded border-gray-300 text-gray-900 focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label={`Mark "${item.title}" as ${item.isCompleted ? 'incomplete' : 'complete'}`}
           />
+          
+          {/* Counter-Style Move Controls */}
+          {(onMoveUp || onMoveDown) && position !== undefined && (
+            <div className="flex flex-col items-center gap-0.5">
+              {/* Up Chevron */}
+              <button
+                onClick={onMoveUp}
+                disabled={isFirst || isReordering || markComplete.isPending || deleteItem.isPending}
+                className={`p-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 ${
+                  isFirst || isReordering || markComplete.isPending || deleteItem.isPending
+                    ? 'text-gray-300 cursor-not-allowed opacity-50'
+                    : 'text-gray-400 hover:text-green-600 hover:bg-green-50 active:bg-green-100 cursor-pointer'
+                }`}
+                aria-label={`Move "${item.title}" up`}
+                title="Move up"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M18 15l-6-6-6 6" />
+                </svg>
+              </button>
+              
+              {/* Position Number */}
+              <span
+                className="text-sm font-semibold text-gray-700 min-w-[1.5rem] text-center"
+                aria-label={`Position ${position}`}
+              >
+                {position}
+              </span>
+              
+              {/* Down Chevron */}
+              <button
+                onClick={onMoveDown}
+                disabled={isLast || isReordering || markComplete.isPending || deleteItem.isPending}
+                className={`p-1 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-1 ${
+                  isLast || isReordering || markComplete.isPending || deleteItem.isPending
+                    ? 'text-gray-300 cursor-not-allowed opacity-50'
+                    : 'text-gray-400 hover:text-red-600 hover:bg-red-50 active:bg-red-100 cursor-pointer'
+                }`}
+                aria-label={`Move "${item.title}" down`}
+                title="Move down"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M6 9l6 6 6-6" />
+                </svg>
+              </button>
+            </div>
+          )}
         </div>
         
         {/* Item Content */}
@@ -259,32 +334,6 @@ const TodoItem: React.FC<TodoItemProps> = ({
               <span className="text-gray-400">Order: {item.order}</span>
             )}
           </div>
-          
-          {/* Reordering Controls */}
-          {(onMoveUp || onMoveDown) && (
-            <div className="flex items-center gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-200 flex-wrap">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onMoveUp}
-                disabled={isFirst || isReordering || markComplete.isPending || deleteItem.isPending}
-                aria-label={`Move "${item.title}" up`}
-                title="Move up"
-              >
-                ↑ Move Up
-              </Button>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onMoveDown}
-                disabled={isLast || isReordering || markComplete.isPending || deleteItem.isPending}
-                aria-label={`Move "${item.title}" down`}
-                title="Move down"
-              >
-                ↓ Move Down
-              </Button>
-            </div>
-          )}
           
           {/* Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-200 flex-wrap">

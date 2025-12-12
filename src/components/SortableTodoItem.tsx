@@ -24,6 +24,12 @@ export interface SortableTodoItemProps extends Omit<TodoItemProps, 'item'> {
    * Unique identifier for drag-and-drop (must be item.id)
    */
   id: string;
+  
+  /**
+   * Whether this item was recently moved (for animation)
+   * @default false
+   */
+  isRecentlyMoved?: boolean;
 }
 
 /**
@@ -48,6 +54,7 @@ export interface SortableTodoItemProps extends Omit<TodoItemProps, 'item'> {
 const SortableTodoItem: React.FC<SortableTodoItemProps> = ({
   id,
   item,
+  isRecentlyMoved = false,
   ...props
 }) => {
   const {
@@ -57,16 +64,26 @@ const SortableTodoItem: React.FC<SortableTodoItemProps> = ({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id });
+  } = useSortable({
+    id,
+    transition: {
+      duration: 250,
+      easing: 'cubic-bezier(0.25, 1, 0.5, 1)',
+    },
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    transition: transition || 'transform 250ms cubic-bezier(0.25, 1, 0.5, 1)',
+    opacity: isDragging ? 0.4 : 1,
   };
 
   return (
-    <div ref={setNodeRef} style={style}>
+    <div 
+      ref={setNodeRef} 
+      style={style}
+      className={isRecentlyMoved ? 'animate-move-item' : ''}
+    >
       <div className="flex items-start gap-2">
         {/* Drag Handle */}
         <button
