@@ -6,11 +6,11 @@
  * Each list is clickable to navigate to list detail.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTodoLists } from '../hooks/useTodoLists';
-import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui';
+import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState, Input } from '../components/ui';
 import CreateListForm from '../components/CreateListForm';
 import Logo from '../components/Logo';
 import type { TodoList } from '../types/api';
@@ -31,6 +31,9 @@ const TodoListsPage: React.FC = () => {
   const { user, logout } = useAuth();
   const { data: lists, isLoading, error } = useTodoLists();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  
+  // Search state
+  const [searchTerm, setSearchTerm] = useState('');
 
   /**
    * Handle logout
@@ -96,6 +99,35 @@ const TodoListsPage: React.FC = () => {
     return list.items?.filter((item) => item.isCompleted).length || 0;
   };
 
+  /**
+   * Filter lists based on search term (case-insensitive search on name and description)
+   */
+  const filteredLists = useMemo(() => {
+    if (!lists || !searchTerm.trim()) {
+      return lists || [];
+    }
+    const term = searchTerm.toLowerCase().trim();
+    return lists.filter(list => {
+      const nameMatch = list.name.toLowerCase().includes(term);
+      const descMatch = list.description?.toLowerCase().includes(term) || false;
+      return nameMatch || descMatch;
+    });
+  }, [lists, searchTerm]);
+
+  /**
+   * Handle search input change
+   */
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  };
+
+  /**
+   * Clear search term
+   */
+  const handleClearSearch = () => {
+    setSearchTerm('');
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 w-full max-w-full overflow-x-hidden">
       {/* Header */}
@@ -139,6 +171,56 @@ const TodoListsPage: React.FC = () => {
             <Button variant="primary" size="md" onClick={handleCreateList}>
               Create New List
             </Button>
+          </div>
+        )}
+
+        {/* Search Bar - Only show when lists exist */}
+        {!isLoading && !error && lists && lists.length > 0 && !showCreateForm && (
+          <div className="mb-6">
+            <div className="relative">
+              <Input
+                type="text"
+                value={searchTerm}
+                onChange={handleSearchChange}
+                placeholder="Search lists by name or description..."
+                aria-label="Search lists"
+                className="w-full"
+              />
+              {searchTerm && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                  aria-label="Clear search"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              )}
+            </div>
+            {searchTerm && (
+              <p className="mt-2 text-sm text-gray-600">
+                {filteredLists.length === 0 ? (
+                  <span>No lists match "{searchTerm}"</span>
+                ) : (
+                  <span>
+                    {filteredLists.length} {filteredLists.length === 1 ? 'list' : 'lists'} found
+                  </span>
+                )}
+              </p>
+            )}
           </div>
         )}
 
@@ -190,10 +272,39 @@ const TodoListsPage: React.FC = () => {
           />
         )}
 
+        {/* Empty State - No Search Results */}
+        {!isLoading && !error && lists && lists.length > 0 && searchTerm && filteredLists.length === 0 && !showCreateForm && (
+          <EmptyState
+            title="No lists match your search"
+            message={`No lists found matching "${searchTerm}". Try a different search term.`}
+            icon={
+              <svg
+                className="w-16 h-16 text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            }
+            action={
+              <Button variant="secondary" size="md" onClick={handleClearSearch}>
+                Clear Search
+              </Button>
+            }
+          />
+        )}
+
         {/* Lists Grid */}
-        {!isLoading && !error && lists && lists.length > 0 && !showCreateForm && (
+        {!isLoading && !error && lists && lists.length > 0 && filteredLists.length > 0 && !showCreateForm && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {lists.map((list) => (
+            {filteredLists.map((list) => (
               <div
                 key={list.id}
                 className="cursor-pointer"
