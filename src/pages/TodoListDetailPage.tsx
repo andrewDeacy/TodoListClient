@@ -419,16 +419,16 @@ const TodoListDetailPage: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4">
             <Button variant="ghost" size="sm" onClick={handleBack}>
               ← Back
             </Button>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {user && (
-                <div className="text-sm text-gray-600">
+                <div className="hidden sm:flex items-center text-sm text-gray-600">
                   <span className="font-medium">{user.username}</span>
                   <span className="mx-2">•</span>
-                  <span className="text-gray-500">{user.email}</span>
+                  <span className="text-gray-500 truncate max-w-[120px] lg:max-w-none">{user.email}</span>
                 </div>
               )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -509,7 +509,7 @@ const TodoListDetailPage: React.FC = () => {
           </div>
           
           {/* Action Buttons */}
-          <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+          <div className="flex flex-wrap gap-2 sm:gap-3 pt-4 border-t border-gray-200">
             <Button
               variant="primary"
               size="md"
@@ -584,6 +584,22 @@ const TodoListDetailPage: React.FC = () => {
           <EmptyState
             title="No items yet"
             message="This list is empty. Add your first item to get started."
+            icon={
+              <svg
+                className="w-16 h-16 text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            }
             action={
               <Button variant="primary" size="md" onClick={handleAddItem}>
                 Add Your First Item

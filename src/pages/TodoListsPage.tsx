@@ -100,14 +100,14 @@ const TodoListsPage: React.FC = () => {
       {/* Header */}
       <header className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
-            <h1 className="text-2xl font-bold text-gray-900">Todo Lists</h1>
-            <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between gap-4">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Todo Lists</h1>
+            <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
               {user && (
-                <div className="text-sm text-gray-600">
+                <div className="hidden sm:flex items-center text-sm text-gray-600">
                   <span className="font-medium">{user.username}</span>
                   <span className="mx-2">•</span>
-                  <span className="text-gray-500">{user.email}</span>
+                  <span className="text-gray-500 truncate max-w-[120px] lg:max-w-none">{user.email}</span>
                 </div>
               )}
               <Button variant="ghost" size="sm" onClick={handleLogout}>
@@ -165,6 +165,22 @@ const TodoListsPage: React.FC = () => {
           <EmptyState
             title="No todo lists yet"
             message="Get started by creating your first todo list to organize your tasks."
+            icon={
+              <svg
+                className="w-16 h-16 text-gray-300"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={1.5}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            }
             action={
               <Button variant="primary" size="md" onClick={handleCreateList}>
                 Create Your First List

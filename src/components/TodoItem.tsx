@@ -262,7 +262,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
           
           {/* Reordering Controls */}
           {(onMoveUp || onMoveDown) && (
-            <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+            <div className="flex items-center gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-200 flex-wrap">
               <Button
                 variant="ghost"
                 size="sm"
@@ -287,7 +287,7 @@ const TodoItem: React.FC<TodoItemProps> = ({
           )}
           
           {/* Action Buttons */}
-          <div className="flex items-center gap-2 mt-3 pt-3 border-t border-gray-200">
+          <div className="flex items-center gap-2 sm:gap-3 mt-3 pt-3 border-t border-gray-200 flex-wrap">
             <Button
               variant="secondary"
               size="sm"

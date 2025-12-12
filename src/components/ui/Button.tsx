@@ -83,10 +83,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
   
   // Size classes
+  // Note: sm size uses min-height for touch-friendly targets (44px minimum recommended)
   const sizeClasses = {
-    sm: 'py-2 px-3 text-sm rounded-full',
-    md: 'py-3 px-4 text-base rounded-full',
-    lg: 'py-4 px-6 text-lg rounded-full',
+    sm: 'py-2 px-3 text-sm rounded-full min-h-[44px]',
+    md: 'py-3 px-4 text-base rounded-full min-h-[44px]',
+    lg: 'py-4 px-6 text-lg rounded-full min-h-[48px]',
   };
   
   // Disabled/loading classes
