@@ -5,9 +5,9 @@
  * Handles item completion state using React Query mutations.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useMarkItemComplete, useDeleteItem } from '../hooks/useTodoItems';
-import { Button, Card } from './ui';
+import { Button, Card, DeleteConfirmationModal } from './ui';
 import type { TodoItem as TodoItemType } from '../types/api';
 
 /**
@@ -122,6 +122,9 @@ const TodoItem: React.FC<TodoItemProps> = ({
   // Delete item mutation
   const deleteItem = useDeleteItem();
   
+  // Delete confirmation modal state
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
   /**
    * Handle completion checkbox toggle
    */
@@ -141,22 +144,36 @@ const TodoItem: React.FC<TodoItemProps> = ({
   };
   
   /**
-   * Handle delete button click
+   * Handle delete button click - show confirmation modal
    */
   const handleDelete = () => {
-    if (window.confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
-      deleteItem.mutate(
-        { listId, itemId: item.id },
-        {
-          onSuccess: () => {
-            onDeleted?.();
-          },
-          onError: (error) => {
-            console.error('Failed to delete item:', error);
-          },
-        }
-      );
-    }
+    setShowDeleteModal(true);
+  };
+  
+  /**
+   * Handle delete confirmation
+   */
+  const handleDeleteConfirm = () => {
+    deleteItem.mutate(
+      { listId, itemId: item.id },
+      {
+        onSuccess: () => {
+          setShowDeleteModal(false);
+          onDeleted?.();
+        },
+        onError: (error) => {
+          console.error('Failed to delete item:', error);
+          // Keep modal open on error so user can retry
+        },
+      }
+    );
+  };
+  
+  /**
+   * Handle delete cancellation
+   */
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
   };
   
   /**
@@ -374,6 +391,16 @@ const TodoItem: React.FC<TodoItemProps> = ({
           )}
         </div>
       </div>
+      
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        title={item.title}
+        itemType="item"
+        onConfirm={handleDeleteConfirm}
+        onCancel={handleDeleteCancel}
+        isDeleting={deleteItem.isPending}
+      />
     </Card>
   );
 };

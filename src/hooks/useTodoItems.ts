@@ -12,6 +12,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import * as listItemService from '../services/listItemService';
 import type { CreateListItemRequest, ReorderItemsRequest } from '../types/api';
+import { todoListKeys } from './useTodoLists';
 
 /**
  * Query key factory for todo item queries.
@@ -119,8 +120,11 @@ export const useCreateItem = () => {
         newItem
       );
       
-      // Also invalidate the parent list to update item count if needed
-      queryClient.invalidateQueries({ queryKey: ['todoLists', variables.listId] });
+      // Invalidate the parent list to update item count
+      queryClient.invalidateQueries({ queryKey: todoListKeys.detail(variables.listId) });
+      
+      // Invalidate all lists to update item counts on lists page
+      queryClient.invalidateQueries({ queryKey: todoListKeys.all });
     },
     // Retry only on server errors (5xx) or network errors, not on client errors (4xx)
     retry: (failureCount, error: any) => {
@@ -223,8 +227,11 @@ export const useDeleteItem = () => {
       // Invalidate the list's items to refetch and remove the deleted item
       queryClient.invalidateQueries({ queryKey: todoItemKeys.list(variables.listId) });
       
-      // Also invalidate the parent list to update item count if needed
-      queryClient.invalidateQueries({ queryKey: ['todoLists', variables.listId] });
+      // Invalidate the parent list to update item count
+      queryClient.invalidateQueries({ queryKey: todoListKeys.detail(variables.listId) });
+      
+      // Invalidate all lists to update item counts on lists page
+      queryClient.invalidateQueries({ queryKey: todoListKeys.all });
     },
     // Retry only on server errors (5xx) or network errors, not on client errors (4xx)
     retry: (failureCount, error: any) => {
@@ -275,6 +282,12 @@ export const useMarkItemComplete = () => {
         todoItemKeys.detail(variables.listId, variables.itemId),
         updated
       );
+      
+      // Invalidate the parent list to update completion status
+      queryClient.invalidateQueries({ queryKey: todoListKeys.detail(variables.listId) });
+      
+      // Invalidate all lists to update completed counts on lists page
+      queryClient.invalidateQueries({ queryKey: todoListKeys.all });
     },
     // Retry only on server errors (5xx) or network errors, not on client errors (4xx)
     retry: (failureCount, error: any) => {

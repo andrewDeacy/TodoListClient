@@ -13,7 +13,7 @@ import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { useAuth } from '../context/AuthContext';
 import { useTodoList, useDeleteList } from '../hooks/useTodoLists';
 import { useTodoItems, useReorderItems } from '../hooks/useTodoItems';
-import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState } from '../components/ui';
+import { Button, Card, LoadingSpinner, ErrorMessage, EmptyState, DeleteConfirmationModal } from '../components/ui';
 import SortableTodoItem from '../components/SortableTodoItem';
 import EditListForm from '../components/EditListForm';
 import CreateItemForm from '../components/CreateItemForm';
@@ -66,6 +66,9 @@ const TodoListDetailPage: React.FC = () => {
   // Edit item form state
   const [editingItem, setEditingItem] = useState<TodoItemType | null>(null);
   
+  // Delete list confirmation modal state
+  const [showDeleteListModal, setShowDeleteListModal] = useState(false);
+  
   /**
    * Handle logout
    */
@@ -82,23 +85,37 @@ const TodoListDetailPage: React.FC = () => {
   };
   
   /**
-   * Handle delete list
+   * Handle delete list button click - show confirmation modal
    */
   const handleDeleteList = () => {
+    setShowDeleteListModal(true);
+  };
+  
+  /**
+   * Handle delete list confirmation
+   */
+  const handleDeleteListConfirm = () => {
     if (!id || !list) return;
     
-    if (window.confirm(`Are you sure you want to delete "${list.name}"? This action cannot be undone.`)) {
-      deleteList.mutate(id, {
-        onSuccess: () => {
-          // Navigate back to lists page after successful deletion
-          navigate('/lists', { replace: true });
-        },
-        onError: (error) => {
-          // Error is handled by the mutation's error state
-          console.error('Failed to delete list:', error);
-        },
-      });
-    }
+    deleteList.mutate(id, {
+      onSuccess: () => {
+        setShowDeleteListModal(false);
+        // Navigate back to lists page after successful deletion
+        navigate('/lists', { replace: true });
+      },
+      onError: (error) => {
+        // Error is handled by the mutation's error state
+        console.error('Failed to delete list:', error);
+        // Keep modal open on error so user can retry
+      },
+    });
+  };
+  
+  /**
+   * Handle delete list cancellation
+   */
+  const handleDeleteListCancel = () => {
+    setShowDeleteListModal(false);
   };
   
   /**
@@ -709,6 +726,18 @@ const TodoListDetailPage: React.FC = () => {
               </DragOverlay>
             </DndContext>
           </div>
+        )}
+        
+        {/* Delete List Confirmation Modal */}
+        {list && (
+          <DeleteConfirmationModal
+            isOpen={showDeleteListModal}
+            title={list.name}
+            itemType="list"
+            onConfirm={handleDeleteListConfirm}
+            onCancel={handleDeleteListCancel}
+            isDeleting={deleteList.isPending}
+          />
         )}
       </main>
     </div>

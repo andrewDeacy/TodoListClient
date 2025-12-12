@@ -21,3 +21,6 @@ export type { ErrorMessageProps } from './ErrorMessage';
 
 export { EmptyState } from './EmptyState';
 export type { EmptyStateProps } from './EmptyState';
+
+export { default as DeleteConfirmationModal } from './DeleteConfirmationModal';
+export type { DeleteConfirmationModalProps } from './DeleteConfirmationModal';
