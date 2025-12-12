@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+/* Critical mobile fixes - outside @layer to ensure they take precedence */
+html {
+  overflow-x: hidden !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  position: relative;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
+  min-width: 320px;
+  min-height: 100vh;
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-height: 100vh;
+  overflow-x: hidden !important;
+  position: relative;
+}
+
+/* Ensure all containers respect viewport width - but allow Tailwind max-width classes to override */
+*:not([class*="max-w"]):not([class*="w-"]) {
+  max-width: 100%;
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  :root {
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    line-height: 1.5;
+    font-weight: 400;
+
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Animation for item movement */
+@keyframes moveItem {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+  50% {
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px 0 rgba(0, 0, 0, 0.15);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+}
+
+.animate-move-item {
+  animation: moveItem 0.5s ease-in-out;
+}
